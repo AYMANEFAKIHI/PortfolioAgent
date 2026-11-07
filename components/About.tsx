@@ -1,12 +1,13 @@
-import { about, principles, skillGroups } from "@/lib/data";
+import type { Content } from "@/lib/content";
 
-export default function About() {
+export default function About({ c }: { c: Content }) {
+  const { about, principles, skillGroups } = c;
   return (
     <section id="about" className="relative border-t border-white/5 bg-[#0b0b0d]">
       <div className="mx-auto max-w-[1280px] px-5 py-24 md:px-10 md:py-32">
-        <p data-build="type" className="label">04 — About</p>
+        <p data-build="type" className="label">{c.ui.aboutLabel}</p>
         <h2 data-build="wipe" data-label="h2" className="mt-4 w-fit font-display text-[clamp(3.2rem,9.5vw,9rem)] uppercase leading-[0.88] tracking-tight text-white">
-          About me
+          {c.ui.aboutTitle}
         </h2>
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
@@ -29,12 +30,12 @@ export default function About() {
           </div>
         </div>
 
-        <h3 data-build="type" className="mt-20 font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">Principles</h3>
+        <h3 data-build="type" className="mt-20 font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">{c.ui.principles}</h3>
         <ol className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {principles.map((p, i) => (
             <li key={p} className="flex">
               <div data-build="pop" data-label="principle" className="card flex w-full flex-col justify-between gap-8 p-6">
-                <span className="font-display text-5xl leading-none text-zinc-700">0{i + 1}</span>
+                <span className="font-display text-5xl leading-none text-zinc-500">0{i + 1}</span>
                 <p className="font-display text-2xl uppercase leading-[1.08] text-white">{p}</p>
               </div>
             </li>

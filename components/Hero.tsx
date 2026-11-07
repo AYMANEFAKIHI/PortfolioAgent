@@ -1,18 +1,22 @@
+import Image from "next/image";
 import { ArrowDown } from "lucide-react";
-import { profile, stats } from "@/lib/data";
+import type { Content } from "@/lib/content";
+import { profile } from "@/lib/data";
 import { hasHeadshot } from "@/lib/files";
+import LangToggle from "./LangToggle";
+import HeroParallax from "./HeroParallax";
 
-const links = [
-  ["Work", "#work"],
-  ["Stack", "#stack"],
-  ["Record", "#record"],
-  ["About", "#about"],
-];
-
-export default function Hero() {
+export default function Hero({ c }: { c: Content }) {
   const shot = hasHeadshot();
+  const links: [string, string][] = [
+    [c.ui.nav.work, "#work"],
+    [c.ui.nav.stack, "#stack"],
+    [c.ui.nav.record, "#record"],
+    [c.ui.nav.about, "#about"],
+  ];
   return (
     <section id="top" className="relative overflow-hidden">
+      <HeroParallax />
       {/* top bar */}
       <header
         data-build="pop"
@@ -31,14 +35,15 @@ export default function Hero() {
               {l}
             </a>
           ))}
-          <a href="#contact" className="btn btn-primary btn-sm">Contact</a>
+          <LangToggle />
+          <a href="#contact" className="btn btn-primary btn-sm">{c.ui.nav.contact}</a>
         </nav>
       </header>
 
       <div className="relative lg:min-h-svh">
         {/* stage: giant word, red glow, headshot */}
         <div className="relative h-[112vw] max-h-[660px] lg:absolute lg:inset-0 lg:h-auto lg:max-h-none">
-          <div className="absolute inset-x-0 top-[12%] flex justify-center lg:top-[10svh]">
+          <div className="par par-1 absolute inset-x-0 top-[12%] flex justify-center lg:top-[10svh]">
             <span
               data-build="wipe"
               data-order="0"
@@ -51,20 +56,20 @@ export default function Hero() {
             </span>
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
+          <div className="par par-3 pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
             <div className="glow h-[104vw] w-[104vw] max-h-[760px] max-w-[760px] translate-y-[22%] lg:h-[86svh] lg:w-[86svh] lg:max-h-none lg:max-w-none lg:translate-y-[16%]" />
           </div>
 
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
+          <div className="par par-2 pointer-events-none absolute inset-x-0 bottom-0 flex justify-center">
             <div data-build="pop" data-order="1" data-hero data-label="headshot">
               {shot ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src="/headshot.png"
                   alt={`Portrait of ${profile.name}`}
                   width={1000}
                   height={1000}
-                  fetchPriority="high"
+                  priority
+                  sizes="(min-width: 1024px) 900px, 100vw"
                   className="shot block h-[min(94vw,560px)] w-auto lg:h-[min(88svh,52vw,920px)]"
                 />
               ) : (
@@ -82,7 +87,7 @@ export default function Hero() {
         <div className="relative z-10 -mt-14 px-5 pb-28 md:px-10 lg:absolute lg:inset-0 lg:mt-0 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)_minmax(0,1fr)] lg:items-center lg:gap-6 lg:pb-16 lg:pt-24">
           <div className="max-w-md">
             <p data-build="type" data-order="2" data-hero className="font-hand text-3xl text-zinc-200 md:text-4xl">
-              Hello, I&apos;m
+              {c.ui.hello}
             </p>
             <h1
               data-build="wipe"
@@ -95,18 +100,18 @@ export default function Hero() {
               <span className="block">Fakihi</span>
             </h1>
             <p data-build="type" data-order="4" data-hero className="mt-4 font-mono text-[0.8rem] font-semibold uppercase tracking-[0.18em] text-accent md:text-sm">
-              {profile.role}
+              {c.role}
             </p>
             <div className="mt-5 space-y-1 text-[0.95rem] leading-relaxed text-zinc-400">
-              <p data-build="type" data-order="5" data-hero>{profile.bio[0]}</p>
-              <p data-build="type" data-order="6" data-hero>{profile.bio[1]}</p>
+              <p data-build="type" data-order="5" data-hero>{c.bio[0]}</p>
+              <p data-build="type" data-order="6" data-hero>{c.bio[1]}</p>
             </div>
             <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-4">
               <a href="#work" data-build="pop" data-order="7" data-hero data-label="button" className="btn btn-primary">
-                View work <ArrowDown size={16} aria-hidden />
+                {c.ui.viewWork} <ArrowDown size={16} aria-hidden />
               </a>
               <p data-build="type" data-order="8" data-hero className="based font-mono text-xs text-zinc-400">
-                Based in {profile.city}
+                {c.ui.basedIn} {c.city}
               </p>
             </div>
           </div>
@@ -114,9 +119,9 @@ export default function Hero() {
           <div className="hidden lg:block" aria-hidden="true" />
 
           <dl className="mt-10 flex flex-col gap-3 lg:mt-0 lg:items-end">
-            {stats.map((s, i) => (
+            {c.stats.map((s, i) => (
               <div
-                key={s.value}
+                key={i}
                 data-build="pop"
                 data-order={9 + i}
                 data-hero

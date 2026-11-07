@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Anton, Geist, Geist_Mono, Caveat_Brush } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import BuildEngine from "@/components/BuildEngine";
 import { RobotHead } from "@/components/RobotHead";
+import { getContent, getLang } from "@/lib/content";
 import { profile, seo } from "@/lib/data";
 import "./globals.css";
 
@@ -10,21 +12,30 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 const caveat = Caveat_Brush({ subsets: ["latin"], weight: "400", variable: "--font-caveat", display: "swap" });
 
-export const metadata: Metadata = {
-  title: seo.title,
-  description: seo.description,
-  keywords: seo.keywords,
-  authors: [{ name: profile.name }],
-  creator: profile.name,
-  openGraph: {
-    type: "website",
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
+
+export async function generateMetadata(): Promise<Metadata> {
+  const lang = await getLang();
+  const description = getContent(lang).description;
+  return {
+    metadataBase: new URL(siteUrl),
     title: seo.title,
-    description: seo.description,
-    siteName: profile.name,
-    locale: "en_US",
-  },
-  twitter: { card: "summary", title: seo.title, description: seo.description },
-};
+    description,
+    keywords: seo.keywords,
+    authors: [{ name: profile.name }],
+    creator: profile.name,
+    openGraph: {
+      type: "website",
+      title: seo.title,
+      description,
+      siteName: profile.name,
+      locale: lang === "fr" ? "fr_FR" : "en_US",
+    },
+    twitter: { card: "summary_large_image", title: seo.title, description },
+  };
+}
 
 export const viewport: Viewport = {
   themeColor: "#09090b",
@@ -42,10 +53,12 @@ d.setAttribute('data-agents',on?'on':'off');
 try{if(sessionStorage.getItem('tour')==='1'){history.scrollRestoration='manual'}}catch(e){}
 }catch(e){}})();`;
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const lang = await getLang();
+  const c = getContent(lang);
   return (
     <html
-      lang="en"
+      lang={lang}
       suppressHydrationWarning
       className={`${anton.variable} ${geist.variable} ${geistMono.variable} ${caveat.variable}`}
     >
@@ -53,16 +66,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script dangerouslySetInnerHTML={{ __html: headScript }} />
       </head>
       <body>
+        <a href="#main" className="skip-link">{c.ui.skip}</a>
         <div id="boot" className="boot" aria-hidden="true">
           <div className="boot-inner">
             <RobotHead className="boot-bot" color="#ff3b2f" />
-            <div>spawning build agents</div>
+            <div>{lang === "fr" ? "démarrage des agents" : "spawning build agents"}</div>
             <div className="boot-bar"><i /></div>
-            <div style={{ color: "#52525b" }}>building portfolio</div>
+            <div style={{ color: "#52525b" }}>{lang === "fr" ? "construction du portfolio" : "building portfolio"}</div>
           </div>
         </div>
         {children}
         <BuildEngine />
+        <Analytics />
       </body>
     </html>
   );

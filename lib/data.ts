@@ -42,6 +42,7 @@ export const stats = [
 
 export type Project = {
   n: string;
+  slug: string;
   title: string;
   category: string;
   bullets: string[];
@@ -53,6 +54,7 @@ export type Project = {
 export const projects: Project[] = [
   {
     n: "01",
+    slug: "emsi-central-portal",
     title: "EMSI Central Portal",
     category: "Academic Platform",
     bullets: [
@@ -65,6 +67,7 @@ export const projects: Project[] = [
   },
   {
     n: "02",
+    slug: "emsi-connect",
     title: "EMSI Connect",
     category: "Social Networking",
     bullets: [
@@ -77,6 +80,7 @@ export const projects: Project[] = [
   },
   {
     n: "03",
+    slug: "emsi-studyhub",
     title: "EMSI StudyHub",
     category: "EMSI-Learning / LMS",
     bullets: [
@@ -89,6 +93,7 @@ export const projects: Project[] = [
   },
   {
     n: "04",
+    slug: "emsi-delegation-system",
     title: "EMSI-Delegation System",
     category: "Management Tool",
     bullets: [
@@ -101,6 +106,7 @@ export const projects: Project[] = [
   },
   {
     n: "05",
+    slug: "solar-system-explorer",
     title: "Solar System Explorer",
     category: "3D Visualisation & Data",
     bullets: [
@@ -113,6 +119,7 @@ export const projects: Project[] = [
   },
   {
     n: "06",
+    slug: "offline-chatbot-rule-editor",
     title: "Offline Chatbot & Rule Editor",
     category: "Front-end Fundamentals & Logic",
     bullets: [
@@ -125,6 +132,7 @@ export const projects: Project[] = [
   },
   {
     n: "07",
+    slug: "webslide-generator",
     title: "WebSlide Generator",
     category: "Declarative UI & Export Tooling",
     bullets: [
@@ -137,6 +145,7 @@ export const projects: Project[] = [
   },
   {
     n: "08",
+    slug: "arduino-student-lab",
     title: "The Arduino Student Lab",
     category: "Technical Education / IoT",
     bullets: [
@@ -149,6 +158,7 @@ export const projects: Project[] = [
   },
   {
     n: "09",
+    slug: "exambuilder",
     title: "ExamBuilder",
     category: "AI-Powered EdTech",
     bullets: [
@@ -162,6 +172,7 @@ export const projects: Project[] = [
   },
   {
     n: "10",
+    slug: "interniq",
     title: "InternIQ",
     category: "AI-Powered JobTech / SaaS",
     bullets: [
@@ -175,6 +186,7 @@ export const projects: Project[] = [
   },
   {
     n: "11",
+    slug: "tipe-cpge",
     title: "TIPE CPGE",
     category: "EdTech / Coaching Platform",
     bullets: [

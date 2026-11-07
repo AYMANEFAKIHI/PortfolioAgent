@@ -1,18 +1,19 @@
 import { Award } from "lucide-react";
-import { certifications, education, experience } from "@/lib/data";
+import type { Content } from "@/lib/content";
 
-export default function Record() {
+export default function Record({ c }: { c: Content }) {
+  const { certs: certifications, education, experience } = c;
   return (
     <section id="record" className="relative mx-auto max-w-[1280px] px-5 py-24 md:px-10 md:py-32">
-      <p data-build="type" className="label">03 — Record</p>
+      <p data-build="type" className="label">{c.ui.recordLabel}</p>
       <h2 data-build="wipe" data-label="h2" className="mt-4 w-fit font-display text-[clamp(3.2rem,9.5vw,9rem)] uppercase leading-[0.88] tracking-tight text-white">
-        The record
+        {c.ui.recordTitle}
       </h2>
 
       <div className="mt-14 grid gap-14 lg:grid-cols-[1.15fr_1fr] lg:gap-16">
         <div className="space-y-14">
           <div>
-            <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">Experience</h3>
+            <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">{c.ui.experience}</h3>
             <div className="tl mt-6 space-y-5">
               {experience.map((e) => (
                 <div key={e.role} className="tl-item">
@@ -28,7 +29,7 @@ export default function Record() {
                       {e.highlight && (
                         <div className="rounded-xl border border-accent/40 bg-accent/10 px-3 py-2 text-right">
                           <div className="font-display text-3xl leading-none text-accent">{e.highlight}</div>
-                          <div className="mt-1 font-mono text-[0.58rem] uppercase tracking-wider text-zinc-400">project efficiency</div>
+                          <div className="mt-1 font-mono text-[0.58rem] uppercase tracking-wider text-zinc-400">{c.ui.efficiency}</div>
                         </div>
                       )}
                     </div>
@@ -51,10 +52,10 @@ export default function Record() {
           </div>
 
           <div>
-            <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">Education</h3>
+            <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">{c.ui.education}</h3>
             <div className="tl mt-6 space-y-4">
               {education.map((e) => (
-                <div key={e.dates} className="tl-item">
+                <div key={e.dates + e.detail} className="tl-item">
                   <div data-build="pop" data-label="card" className="card px-5 py-4">
                     <p className="font-mono text-[0.7rem] uppercase tracking-[0.16em] text-accent">
                       {e.dates}
@@ -70,7 +71,7 @@ export default function Record() {
         </div>
 
         <div>
-          <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">Certifications</h3>
+          <h3 data-build="type" className="font-mono text-xs uppercase tracking-[0.22em] text-zinc-500">{c.ui.certifications}</h3>
           <div data-build="pop" data-label="card" className="card mt-6 overflow-hidden">
             <div className="flex items-center gap-4 border-b border-white/5 p-6">
               <span className="grid h-12 w-12 place-items-center rounded-xl bg-accent text-bg">
@@ -78,7 +79,7 @@ export default function Record() {
               </span>
               <div>
                 <div className="font-display text-5xl leading-none text-white">28</div>
-                <div className="mt-1 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-zinc-400">certifications</div>
+                <div className="mt-1 font-mono text-[0.68rem] uppercase tracking-[0.18em] text-zinc-400">{c.ui.certLabel}</div>
               </div>
             </div>
             <ul className="divide-y divide-white/5">

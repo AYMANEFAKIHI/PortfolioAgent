@@ -1,0 +1,313 @@
+import { cookies } from "next/headers";
+import {
+  about as aboutEn, certifications, education as eduEn, experience as expEn, principles as prinEn,
+  profile, projects as projEn, seo, services as servEn, skillGroups as skillsEn, stats as statsEn,
+} from "./data";
+
+export type Lang = "en" | "fr";
+
+export async function getLang(): Promise<Lang> {
+  try {
+    const c = await cookies();
+    return c.get("lang")?.value === "fr" ? "fr" : "en";
+  } catch {
+    return "en";
+  }
+}
+
+const uiEn = {
+  skip: "Skip to content",
+  nav: { work: "Work", stack: "Stack", record: "Record", about: "About", contact: "Contact" },
+  hello: "Hello, I'm",
+  viewWork: "View work",
+  basedIn: "Based in",
+  workLabel: "01 — Work",
+  workTitle: "Work that ships",
+  workShort: "Real products for real users, from a central academic portal to AI-powered tools.",
+  filterLabel: "Filter by tech",
+  filterAll: "All",
+  filterAi: "AI",
+  noMatch: "No project matches this filter.",
+  caseStudy: "Case study",
+  problem: "Problem & goal",
+  solution: "Solution & implementation",
+  results: "Results",
+  techUsed: "Technologies used",
+  allProjects: "All projects",
+  prevProject: "Previous project",
+  nextProject: "Next project",
+  visitLive: "Visit live site",
+  sourceCode: "Source code",
+  live: "Live",
+  code: "Code",
+  stackLabel: "02 — Stack",
+  stackTitle: "Tools I ship with",
+  recordLabel: "03 — Record",
+  recordTitle: "The record",
+  experience: "Experience",
+  education: "Education",
+  certifications: "Certifications",
+  certLabel: "certifications",
+  efficiency: "project efficiency",
+  aboutLabel: "04 — About",
+  aboutTitle: "About me",
+  principles: "Principles",
+  contactLabel: "05 — Contact",
+  contactTitle: "Get in touch",
+  ctaA: "Let's build",
+  ctaB: "something",
+  emailMe: "Email me",
+  resume: "Download resume",
+  email: "Email",
+  formTitle: "Send a message",
+  fName: "Your name",
+  fEmail: "Your email",
+  fMsg: "Your message",
+  fSend: "Send message",
+  fSending: "Sending…",
+  fSent: "Message sent. Thank you!",
+  fMailto: "Your mail app was opened with the message ready to send.",
+  fError: "Something went wrong. Please email me directly.",
+  fInvalid: "Please fill in all fields with a valid email.",
+  services: "Services",
+};
+const uiFr: typeof uiEn = {
+  skip: "Aller au contenu",
+  nav: { work: "Projets", stack: "Stack", record: "Parcours", about: "À propos", contact: "Contact" },
+  hello: "Bonjour, je suis",
+  viewWork: "Voir mes projets",
+  basedIn: "Basé à",
+  workLabel: "01 — Projets",
+  workTitle: "Des projets livrés",
+  workShort: "De vrais produits pour de vrais utilisateurs, d'un portail académique central à des outils propulsés par l'IA.",
+  filterLabel: "Filtrer par techno",
+  filterAll: "Tous",
+  filterAi: "IA",
+  noMatch: "Aucun projet ne correspond à ce filtre.",
+  caseStudy: "Étude de cas",
+  problem: "Problème & objectif",
+  solution: "Solution & mise en œuvre",
+  results: "Résultats",
+  techUsed: "Technologies utilisées",
+  allProjects: "Tous les projets",
+  prevProject: "Projet précédent",
+  nextProject: "Projet suivant",
+  visitLive: "Voir le site",
+  sourceCode: "Code source",
+  live: "Démo",
+  code: "Code",
+  stackLabel: "02 — Stack",
+  stackTitle: "Mes outils",
+  recordLabel: "03 — Parcours",
+  recordTitle: "Mon parcours",
+  experience: "Expérience",
+  education: "Formation",
+  certifications: "Certifications",
+  certLabel: "certifications",
+  efficiency: "efficacité du projet",
+  aboutLabel: "04 — À propos",
+  aboutTitle: "À propos",
+  principles: "Principes",
+  contactLabel: "05 — Contact",
+  contactTitle: "Me contacter",
+  ctaA: "Construisons",
+  ctaB: "quelque chose",
+  emailMe: "M'écrire",
+  resume: "Télécharger le CV",
+  email: "E-mail",
+  formTitle: "Envoyer un message",
+  fName: "Votre nom",
+  fEmail: "Votre e-mail",
+  fMsg: "Votre message",
+  fSend: "Envoyer",
+  fSending: "Envoi…",
+  fSent: "Message envoyé. Merci !",
+  fMailto: "Votre application mail s'est ouverte avec le message prêt à envoyer.",
+  fError: "Une erreur est survenue. Écrivez-moi directement par e-mail.",
+  fInvalid: "Merci de remplir tous les champs avec un e-mail valide.",
+  services: "Services",
+};
+
+const projFr: Record<string, { category: string; bullets: string[] }> = {
+  "01": {
+    category: "Plateforme académique",
+    bullets: [
+      "La passerelle numérique centrale de l'écosystème EMSI.",
+      "Regroupe actualités, emplois du temps et annonces institutionnelles pour des milliers d'étudiants.",
+    ],
+  },
+  "02": {
+    category: "Réseau social",
+    bullets: [
+      "Plateforme de réseautage social et professionnel qui met en relation étudiants actuels et alumni.",
+      "Messagerie en temps réel et gestion d'événements.",
+    ],
+  },
+  "03": {
+    category: "EMSI-Learning / LMS",
+    bullets: [
+      "Dépôt de ressources académiques pour accéder aux supports de cours et partager des notes.",
+      "Optimisée pour la performance pendant les périodes d'examens à fort trafic.",
+    ],
+  },
+  "04": {
+    category: "Outil de gestion",
+    bullets: [
+      "Outil administratif qui simplifie le travail des représentants étudiants (délégués).",
+      "Facilite le vote sécurisé et la collecte de retours.",
+    ],
+  },
+  "05": {
+    category: "Visualisation 3D & données",
+    bullets: [
+      "Application web interactive qui affiche un modèle à l'échelle du système solaire.",
+      "Illustre des concepts de physique complexes en JavaScript pur.",
+    ],
+  },
+  "06": {
+    category: "Fondamentaux front-end & logique",
+    bullets: [
+      "Chatbot autonome, utilisable hors ligne, avec un éditeur de règles personnalisé.",
+      "Démontre une solide maîtrise de la logique JavaScript vanilla et de la gestion de données JSON.",
+    ],
+  },
+  "07": {
+    category: "UI déclarative & outils d'export",
+    bullets: [
+      "Outil pour développeurs qui crée des présentations HTML/CSS responsives à partir de modèles déclaratifs.",
+      "Prend en charge l'export PDF et ZIP.",
+    ],
+  },
+  "08": {
+    category: "Éducation technique / IoT",
+    bullets: [
+      "Plateforme éducative avec des tutoriels clairs, par projet, pour maîtriser la programmation Arduino.",
+      "Accent sur l'électronique et l'informatique physique.",
+    ],
+  },
+  "09": {
+    category: "EdTech propulsée par l'IA",
+    bullets: [
+      "Plateforme intelligente propulsée par Google Gemini AI, pensée pour les enseignants.",
+      "Génère en quelques secondes des examens professionnels et bien mis en forme.",
+      "Export PDF instantané.",
+    ],
+  },
+  "10": {
+    category: "JobTech / SaaS propulsé par l'IA",
+    bullets: [
+      "Plateforme d'IA spécialisée pour les étudiants marocains qui automatise la recherche de stage.",
+      "Récupère les offres des sites d'emploi locaux et évalue la correspondance des CV.",
+      "Génère des lettres de motivation sur mesure.",
+    ],
+  },
+  "11": {
+    category: "EdTech / Plateforme de coaching",
+    bullets: [
+      "Plateforme de coaching en français pour aider les étudiants de CPGE à réussir leur projet de recherche TIPE.",
+      "Comprend des simulations expérimentales, de la préparation à l'oral et du mentorat scientifique.",
+    ],
+  },
+};
+
+export function getContent(lang: Lang) {
+  if (lang === "en") {
+    return {
+      lang,
+      ui: uiEn,
+      role: profile.role,
+      city: profile.city,
+      status: profile.status,
+      bio: profile.bio,
+      description: seo.description,
+      stats: statsEn,
+      projects: projEn,
+      skillGroups: skillsEn,
+      experience: expEn,
+      education: eduEn,
+      certs: certifications,
+      about: aboutEn,
+      principles: prinEn,
+      services: servEn,
+    };
+  }
+  const certDates = ["oct. 2026", "avril 2026", "mars 2026", "mars 2026", "juil. 2026", "mars 2026", "mars 2026", "mars 2026", "mars 2026", "mars 2026"];
+  return {
+    lang,
+    ui: uiFr,
+    role: "Développeur Full Stack & Designer",
+    city: "Rabat, Maroc",
+    status: "Disponible pour des projets freelance et des opportunités de stage",
+    bio: [
+      "Développeur Full-Stack qui conçoit des écosystèmes web évolutifs, à la croisée de la performance et du design.",
+      "Je livre de vrais produits utilisés par plus de 5 000 étudiants et enseignants du réseau EMSI.",
+    ],
+    description:
+      "Développeur Full Stack basé à Rabat, au Maroc. Spécialisé en Next.js, Node.js et applications web évolutives. Des plateformes utilisées par plus de 5 000 utilisateurs.",
+    stats: [
+      { value: "5 000+", label: "étudiants et enseignants servis dans le réseau EMSI" },
+      { value: "11", label: "projets livrés" },
+      { value: "28", label: "certifications" },
+    ],
+    projects: projEn.map((p) => ({ ...p, ...projFr[p.n] })),
+    skillGroups: [
+      { ...skillsEn[0], title: "Frontend" },
+      { ...skillsEn[1], title: "Backend" },
+      { ...skillsEn[2], title: "Bases de données" },
+      { ...skillsEn[3], title: "DevOps & Cloud" },
+      { ...skillsEn[4], title: "Tests & Outils" },
+      { ...skillsEn[5], title: "Outils d'IA" },
+    ],
+    experience: [
+      {
+        ...expEn[0],
+        role: "Développeur Web",
+        place: "Rabat, Maroc",
+        dates: "Été 2025 · Stage",
+        bullets: [
+          "Développement et maintenance d'interfaces web modernes avec React, Next.js et TailwindCSS.",
+          "Conception et optimisation de services backend avec Node.js et PostgreSQL.",
+          "Amélioration des performances et du SEO des pages en production.",
+        ],
+      },
+      {
+        ...expEn[1],
+        role: "Fondateur & Chef de projet",
+        org: "TIPE, projet technique indépendant",
+        place: "Meknès / Rabat, Maroc",
+        dates: "2022 – Aujourd'hui",
+        bullets: [
+          "Conception et réalisation d'un projet technique complet couvrant le traitement de données, les systèmes embarqués et l'architecture logicielle.",
+          "Pilotage du développement du prototype, de la documentation technique et de l'analyse des performances, du concept au système fonctionnel.",
+          "Augmentation de l'efficacité du projet de 30 % grâce à des processus optimisés.",
+        ],
+      },
+    ],
+    education: [
+      { dates: "2024 – Aujourd'hui", note: "Diplôme prévu en 2027", title: "EMSI Rabat", detail: "Étudiant ingénieur en informatique logicielle" },
+      { dates: "2023 – 2024", note: "", title: "Premières classes préparatoires (CPGE)", detail: "MP (Mathématiques-Physique)" },
+      { dates: "2022 – 2023", note: "", title: "Premières classes préparatoires (CPGE)", detail: "MPSI (Mathématiques-Physique-Sciences de l'Ingénieur)" },
+      { dates: "2021 – 2022", note: "", title: "Lycée Almansour Edahbi", detail: "Baccalauréat (Sciences Mathématiques)" },
+    ],
+    certs: certifications.map((c, i) => ({ ...c, date: certDates[i] })),
+    about: [
+      "Développeur Full-Stack spécialisé dans les écosystèmes web évolutifs. Je me concentre sur la croisée de la performance et du design : des applications modernes à l'œil, qui gèrent efficacement des données complexes. Je poursuis actuellement un cycle d'ingénieur à l'EMSI Rabat et j'ai livré des plateformes utilisées par plus de 5 000 étudiants et enseignants du réseau EMSI, d'un portail central qui agrège des données académiques en temps réel à un réseau social complet en stack MERN.",
+      "Ma stack de prédilection est l'écosystème JavaScript (Next.js, Node.js) associé à une architecture cloud sur AWS. En dehors du code, j'explore les outils DevOps et je crée des applications intégrant l'IA.",
+    ],
+    principles: [
+      "La performance et le design vont de pair.",
+      "Créer de vrais produits pour de vrais utilisateurs.",
+      "Rendre les applications riches en données efficaces et évolutives.",
+      "Toujours apprendre : cloud, DevOps et outils d'IA.",
+    ],
+    services: [
+      "Développement web Full Stack",
+      "Applications Next.js / React",
+      "Conception d'API REST & backend",
+      "Design UI/UX (Figma)",
+      "Déploiement cloud (AWS/Vercel)",
+    ],
+  };
+}
+
+export type Content = ReturnType<typeof getContent>;

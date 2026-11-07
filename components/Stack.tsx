@@ -1,12 +1,13 @@
+import type { Content } from "@/lib/content";
 import { marqueeTools } from "@/lib/data";
 
-export default function Stack() {
+export default function Stack({ c }: { c: Content }) {
   return (
     <section id="stack" className="relative border-y border-white/5 py-20 md:py-28">
       <div className="mx-auto max-w-[1280px] px-5 md:px-10">
-        <p data-build="type" className="label">02 — Stack</p>
+        <p data-build="type" className="label">{c.ui.stackLabel}</p>
         <h2 data-build="wipe" data-label="h2" className="mt-4 w-fit font-display text-[clamp(3rem,8vw,7rem)] uppercase leading-[0.9] tracking-tight text-white">
-          Tools I ship with
+          {c.ui.stackTitle}
         </h2>
       </div>
       <div data-build="wipe" data-label="marquee" className="marquee mt-12" aria-label="Tools and technologies">

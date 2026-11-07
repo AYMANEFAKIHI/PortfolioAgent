@@ -43,12 +43,14 @@ export interface EngineState {
   agents: boolean;
   paused: boolean;
   tour: boolean;
+  sound: boolean;
 }
 
 export interface Engine {
   state(): EngineState;
   subscribe(fn: (s: EngineState) => void): () => void;
   togglePause(): void;
+  toggleSound(): void;
   stopTour(): void;
   destroy(): void;
 }
@@ -76,7 +78,13 @@ export function createEngine(): Engine {
   const root = document.documentElement;
   const agentsOn = root.classList.contains("build-mode");
   const listeners = new Set<(s: EngineState) => void>();
-  const S: EngineState = { agents: agentsOn, paused: false, tour: false };
+  let soundSaved = false;
+  try {
+    soundSaved = localStorage.getItem("sound") === "on";
+  } catch {
+    /* storage unavailable */
+  }
+  const S: EngineState = { agents: agentsOn, paused: false, tour: false, sound: soundSaved };
   const emit = () => listeners.forEach((fn) => fn({ ...S }));
 
   (window as unknown as { __af?: boolean }).__af = true;
@@ -92,6 +100,48 @@ export function createEngine(): Engine {
     const id = window.setTimeout(fn, ms);
     timers.push(id);
   };
+
+  /* ───────── Sound (off by default; needs a click to start) ───────── */
+  let actx: AudioContext | null = null;
+  let lastBlip = 0;
+  function ensureAudio() {
+    if (actx) {
+      if (actx.state === "suspended") void actx.resume();
+      return;
+    }
+    const AC = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (AC) actx = new AC();
+  }
+  function blip(freq: number, ms: number, vol = 0.025, type: OscillatorType = "square") {
+    if (!S.sound || S.paused || !actx || actx.state !== "running") return;
+    const now = performance.now();
+    if (now - lastBlip < 28) return;
+    lastBlip = now;
+    const o = actx.createOscillator();
+    const g = actx.createGain();
+    o.type = type;
+    o.frequency.value = freq;
+    const t = actx.currentTime;
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + ms / 1000);
+    o.connect(g).connect(actx.destination);
+    o.start(t);
+    o.stop(t + ms / 1000 + 0.02);
+  }
+  const unlock = () => {
+    if (S.sound) ensureAudio();
+  };
+  window.addEventListener("pointerdown", unlock);
+  window.addEventListener("keydown", unlock);
+
+  /* ───────── Pointer (idle cursors politely dodge the real mouse) ───────── */
+  let mx = -9999;
+  let my = -9999;
+  const onMove = (e: PointerEvent) => {
+    mx = e.clientX;
+    my = e.clientY;
+  };
+  window.addEventListener("pointermove", onMove, { passive: true });
 
   /* ───────── Items ───────── */
   const items: Item[] = [];
@@ -129,6 +179,7 @@ export function createEngine(): Engine {
   function begin(it: Item) {
     const el = it.el;
     el.classList.add("is-built");
+    blip(it.kind === "pop" ? 440 : it.kind === "wipe" ? 330 : 660, 70);
     if (it.kind === "type") {
       el.classList.add("is-typing");
       el.textContent = "";
@@ -144,7 +195,9 @@ export function createEngine(): Engine {
   function progress(it: Item, p: number) {
     const el = it.el;
     if (it.kind === "type") {
-      el.textContent = it.text.slice(0, Math.floor(p * it.text.length));
+      const n = Math.floor(p * it.text.length);
+      if (n !== el.textContent?.length && n % 3 === 0) blip(1300 + (n % 9) * 40, 14, 0.012);
+      el.textContent = it.text.slice(0, n);
     } else if (it.kind === "pop") {
       const e = easeBack(clamp(p, 0, 1));
       el.style.opacity = String(Math.min(1, p * 2.4));
@@ -470,6 +523,15 @@ export function createEngine(): Engine {
 
     for (const a of agents) {
       stepAgent(a);
+      if (a.phase === "idle" && a.visible && mx > -9000) {
+        const dx = a.x + 8 - mx;
+        const dy = a.y + 10 - my;
+        const d = Math.hypot(dx, dy);
+        if (d < 120) {
+          const push = (120 - d) * 0.22;
+          place(a, clamp(a.x + (dx / (d || 1)) * push, 6, window.innerWidth - 150), clamp(a.y + (dy / (d || 1)) * push, 6, window.innerHeight - 70));
+        }
+      }
       // park idle cursors after a moment
       if (a.phase === "idle" && a.visible && T - a.idleSince > 1000 && !queue.length) {
         a.visible = false;
@@ -536,8 +598,25 @@ export function createEngine(): Engine {
       S.paused = !S.paused;
       emit();
     },
+    toggleSound() {
+      S.sound = !S.sound;
+      try {
+        localStorage.setItem("sound", S.sound ? "on" : "off");
+      } catch {
+        /* storage unavailable */
+      }
+      if (S.sound) {
+        ensureAudio();
+        blip(880, 90);
+      }
+      emit();
+    },
     stopTour,
     destroy() {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      window.removeEventListener("pointermove", onMove);
+      void actx?.close();
       destroyed = true;
       cancelAnimationFrame(rafId);
       timers.forEach((id) => clearTimeout(id));
