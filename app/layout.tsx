@@ -5,6 +5,9 @@ import BuildEngine from "@/components/BuildEngine";
 import { RobotHead } from "@/components/RobotHead";
 import { getContent, getLang } from "@/lib/content";
 import { profile, seo } from "@/lib/data";
+import { siteUrl } from "@/lib/site";
+import CommandPalette from "@/components/CommandPalette";
+import { getPaletteItems } from "@/lib/palette";
 import "./globals.css";
 
 const anton = Anton({ subsets: ["latin"], weight: "400", variable: "--font-anton", display: "swap" });
@@ -12,9 +15,6 @@ const geist = Geist({ subsets: ["latin"], variable: "--font-geist", display: "sw
 const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 const caveat = Caveat_Brush({ subsets: ["latin"], weight: "400", variable: "--font-caveat", display: "swap" });
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : "http://localhost:3000");
 
 export async function generateMetadata(): Promise<Metadata> {
   const lang = await getLang();
@@ -32,8 +32,9 @@ export async function generateMetadata(): Promise<Metadata> {
       description,
       siteName: profile.name,
       locale: lang === "fr" ? "fr_FR" : "en_US",
+      images: [{ url: "/og.jpg", width: 1200, height: 630, alt: `${profile.name} — ${profile.role}` }],
     },
-    twitter: { card: "summary_large_image", title: seo.title, description },
+    twitter: { card: "summary_large_image", title: seo.title, description, images: ["/og.jpg"] },
   };
 }
 
@@ -77,6 +78,11 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         </div>
         {children}
         <BuildEngine />
+        <CommandPalette
+          lang={lang}
+          items={getPaletteItems(lang)}
+          labels={{ placeholder: c.ui.palettePlaceholder, none: c.ui.paletteNone, sections: c.ui.paletteSections, projects: c.ui.paletteProjects, certs: c.ui.paletteCerts, actions: c.ui.paletteActions, hint: c.ui.paletteHint }}
+        />
         <Analytics />
       </body>
     </html>

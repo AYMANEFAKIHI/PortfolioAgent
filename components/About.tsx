@@ -1,6 +1,7 @@
 import type { Content } from "@/lib/content";
+import GithubActivity from "./GithubActivity";
 
-export default function About({ c }: { c: Content }) {
+export default async function About({ c }: { c: Content }) {
   const { about, principles, skillGroups } = c;
   return (
     <section id="about" className="relative border-t border-white/5 bg-[#0b0b0d]">
@@ -41,6 +42,8 @@ export default function About({ c }: { c: Content }) {
             </li>
           ))}
         </ol>
+
+        <GithubActivity c={c} />
       </div>
     </section>
   );

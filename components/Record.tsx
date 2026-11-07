@@ -1,4 +1,6 @@
 import { Award } from "lucide-react";
+import { getCertificateFiles } from "@/lib/certificates";
+import CertificateGallery from "./CertificateGallery";
 import type { Content } from "@/lib/content";
 
 export default function Record({ c }: { c: Content }) {
@@ -92,6 +94,9 @@ export default function Record({ c }: { c: Content }) {
                 </li>
               ))}
             </ul>
+            <div className="border-t border-white/5 p-5">
+              <CertificateGallery files={getCertificateFiles(c.lang)} labels={c.ui} />
+            </div>
           </div>
         </div>
       </div>

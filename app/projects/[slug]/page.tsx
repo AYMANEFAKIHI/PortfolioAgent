@@ -5,6 +5,7 @@ import { cases } from "@/lib/cases";
 import { getContent, getLang } from "@/lib/content";
 import { profile } from "@/lib/data";
 import LangToggle from "@/components/LangToggle";
+import { projectImage } from "@/lib/files";
 
 // NOTE: links use plain <a> (full page load) so the build animation restarts on every page.
 
@@ -30,6 +31,7 @@ export default async function ProjectPage({ params }: Params) {
   if (i < 0) notFound();
   const p = c.projects[i];
   const cs = cases[p.n][c.lang];
+  const shot = projectImage(p.slug);
   const prev = c.projects[(i - 1 + c.projects.length) % c.projects.length];
   const next = c.projects[(i + 1) % c.projects.length];
 
@@ -75,6 +77,13 @@ export default async function ProjectPage({ params }: Params) {
           </a>
         )}
       </div>
+
+      {shot && (
+        <figure data-build="pop" data-label="screenshot" className="card mt-12 overflow-hidden p-2">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={shot} alt={`${p.title} screenshot`} className="w-full rounded-xl" loading="lazy" />
+        </figure>
+      )}
 
       <div className="mt-14 grid gap-4">
         {section(c.ui.problem, <p>{cs.problem}</p>, "01")}

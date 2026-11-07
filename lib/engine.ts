@@ -52,6 +52,7 @@ export interface Engine {
   togglePause(): void;
   toggleSound(): void;
   stopTour(): void;
+  party(): void;
   destroy(): void;
 }
 
@@ -95,6 +96,8 @@ export function createEngine(): Engine {
   let T = 0; // virtual clock (frozen while paused)
   let destroyed = false;
   let started = false;
+  let roamUntil = 0;
+  const roamTarget = new Map<Agent, { x: number; y: number }>();
   const timers: number[] = [];
   const after = (fn: () => void, ms: number) => {
     const id = window.setTimeout(fn, ms);
@@ -532,6 +535,21 @@ export function createEngine(): Engine {
           place(a, clamp(a.x + (dx / (d || 1)) * push, 6, window.innerWidth - 150), clamp(a.y + (dy / (d || 1)) * push, 6, window.innerHeight - 70));
         }
       }
+      // easter egg: roam the screen
+      if (a.phase === "idle" && T < roamUntil) {
+        if (!a.visible) {
+          a.visible = true;
+          a.el.style.opacity = "1";
+          place(a, Math.random() * (window.innerWidth - 160), Math.random() * (window.innerHeight - 80));
+        }
+        let tg = roamTarget.get(a);
+        if (!tg || Math.hypot(tg.x - a.x, tg.y - a.y) < 14) {
+          tg = { x: 10 + Math.random() * (window.innerWidth - 170), y: 10 + Math.random() * (window.innerHeight - 90) };
+          roamTarget.set(a, tg);
+        }
+        place(a, a.x + (tg.x - a.x) * 0.045, a.y + (tg.y - a.y) * 0.045);
+        a.idleSince = T;
+      }
       // park idle cursors after a moment
       if (a.phase === "idle" && a.visible && T - a.idleSince > 1000 && !queue.length) {
         a.visible = false;
@@ -612,6 +630,12 @@ export function createEngine(): Engine {
       emit();
     },
     stopTour,
+    party() {
+      if (!agentsOn || !layer) return;
+      roamUntil = T + 7000;
+      blip(660, 120);
+      ensureLoop();
+    },
     destroy() {
       window.removeEventListener("pointerdown", unlock);
       window.removeEventListener("keydown", unlock);

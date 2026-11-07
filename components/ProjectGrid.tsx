@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ArrowUpRight, Github } from "lucide-react";
 import type { Project } from "@/lib/data";
 
-type Labels = { caseStudy: string; filterLabel: string; filterAll: string; filterAi: string; noMatch: string; live: string; code: string };
+type Labels = { statusOnline: string; statusOffline: string; caseStudy: string; filterLabel: string; filterAll: string; filterAi: string; noMatch: string; live: string; code: string };
 
 const FILTERS: { id: string; label?: string; test: (t: string[]) => boolean }[] = [
   { id: "all", test: () => true },
@@ -18,6 +18,17 @@ const FILTERS: { id: string; label?: string; test: (t: string[]) => boolean }[] 
 
 export default function ProjectGrid({ projects, labels }: { projects: Project[]; labels: Labels }) {
   const [active, setActive] = useState("all");
+  const [status, setStatus] = useState<Record<string, boolean>>({});
+  useEffect(() => {
+    let off = false;
+    fetch("/api/status")
+      .then((r) => (r.ok ? r.json() : {}))
+      .then((d) => !off && setStatus(d))
+      .catch(() => {});
+    return () => {
+      off = true;
+    };
+  }, []);
   const f = FILTERS.find((x) => x.id === active) ?? FILTERS[0];
   const shown = useMemo(() => new Set(projects.filter((p) => f.test(p.tech)).map((p) => p.n)), [projects, f]);
 
@@ -52,7 +63,13 @@ export default function ProjectGrid({ projects, labels }: { projects: Project[];
                   {p.category}
                 </span>
               </div>
-              <h3 className="mt-5 font-display text-[1.9rem] uppercase leading-[1.02] tracking-tight text-white">{p.title}</h3>
+              {status[p.slug] !== undefined && (
+                <p className="mt-4 inline-flex items-center gap-2 font-mono text-[0.62rem] uppercase tracking-wider text-zinc-400">
+                  <span className={`h-2 w-2 rounded-full ${status[p.slug] ? "bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,.8)]" : "bg-zinc-600"}`} aria-hidden />
+                  {status[p.slug] ? labels.statusOnline : labels.statusOffline}
+                </p>
+              )}
+              <h3 className="mt-3 font-display text-[1.9rem] uppercase leading-[1.02] tracking-tight text-white">{p.title}</h3>
               <ul className="bullets mt-4 space-y-2 text-[0.9rem] leading-relaxed text-zinc-400">
                 {p.bullets.map((b) => (
                   <li key={b}>{b}</li>

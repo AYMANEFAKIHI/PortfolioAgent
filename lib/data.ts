@@ -9,6 +9,8 @@ export const profile = {
   github: "https://github.com/AYMANEFAKIHI",
   linkedin: "https://www.linkedin.com/in/aymane-fakihi-9a3435335/",
   instagram: null as string | null, // (none provided) -> hidden
+  // Optional: set NEXT_PUBLIC_BOOKING_URL (Calendly, Cal.com…) to show a "Book a call" button. Unset -> hidden.
+  booking: (process.env.NEXT_PUBLIC_BOOKING_URL || null) as string | null,
   resumePdf: "/aymane_fakihi.pdf",
   bio: [
     "Full-Stack Developer building scalable web ecosystems at the intersection of performance and design.",
@@ -278,3 +280,6 @@ export const services = [
 ];
 
 export const marqueeTools = skillGroups.flatMap((g) => g.items);
+
+// Optional testimonials. Add real, approved quotes here and a section appears; empty -> hidden.
+export const testimonials: { quote: string; name: string; role: string }[] = [];

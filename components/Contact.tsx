@@ -1,7 +1,8 @@
-import { ArrowUpRight, Download, Github, Linkedin, Mail } from "lucide-react";
+import { ArrowUpRight, CalendarDays, Download, Github, Linkedin, Mail } from "lucide-react";
 import type { Content } from "@/lib/content";
 import { profile } from "@/lib/data";
-import { hasResumePdf } from "@/lib/files";
+import { hasResumePdf, hasResumePreview } from "@/lib/files";
+import ResumeViewer from "./ResumeViewer";
 import ContactForm from "./ContactForm";
 
 export default function Contact({ c }: { c: Content }) {
@@ -32,6 +33,14 @@ export default function Contact({ c }: { c: Content }) {
           <a href={`mailto:${profile.email}`} className="btn btn-primary">
             <Mail size={16} aria-hidden /> {c.ui.emailMe}
           </a>
+          {profile.booking && (
+            <a href={profile.booking} target="_blank" rel="noopener noreferrer" className="btn btn-ghost">
+              <CalendarDays size={16} aria-hidden /> {c.ui.bookCall}
+            </a>
+          )}
+          {pdf && hasResumePreview() && (
+            <ResumeViewer label={c.ui.viewResume} title={c.ui.resumeTitle} close={c.ui.certClose} download={c.ui.certDownload} pdf={profile.resumePdf} image="/resume-preview.webp" name={profile.name} />
+          )}
           {pdf && (
             <a href={profile.resumePdf} download className="btn btn-ghost">
               <Download size={16} aria-hidden /> {c.ui.resume}

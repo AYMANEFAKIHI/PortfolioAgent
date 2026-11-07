@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Bot, Pause, Play, Route, Square, Volume2, VolumeX } from "lucide-react";
+import { Bot, Pause, Play, Route, Search, Square, Volume2, VolumeX } from "lucide-react";
 import { createEngine, type Engine, type EngineState } from "@/lib/engine";
 
 const TXT = {
   en: {
     pause: "Pause", resume: "Resume", agents: "Agents", on: "on", off: "off", tour: "Tour", stop: "Stop tour", sound: "Sound",
-    tPause: "Pause / resume (P)", tAgents: "Agents on / off (A)", tTour: "Auto-scroll tour (T). Esc or scrolling stops it.", tSound: "Sound on / off (S)",
+    tPause: "Pause / resume (P)", tAgents: "Agents on / off (A)", tTour: "Auto-scroll tour (T). Esc or scrolling stops it.", tSound: "Sound on / off (S)", search: "Search", tSearch: "Search everything (Ctrl/⌘ K or /)",
     caps: {
       top: "Hero — Full Stack Developer & Designer",
       work: "Work — 11 shipped projects",
@@ -19,7 +19,7 @@ const TXT = {
   },
   fr: {
     pause: "Pause", resume: "Reprendre", agents: "Agents", on: "oui", off: "non", tour: "Visite", stop: "Arrêter", sound: "Son",
-    tPause: "Pause / reprise (P)", tAgents: "Agents oui / non (A)", tTour: "Visite automatique (T). Échap ou le défilement l'arrête.", tSound: "Son oui / non (S)",
+    tPause: "Pause / reprise (P)", tAgents: "Agents oui / non (A)", tTour: "Visite automatique (T). Échap ou le défilement l'arrête.", tSound: "Son oui / non (S)", search: "Recherche", tSearch: "Tout rechercher (Ctrl/⌘ K ou /)",
     caps: {
       top: "Accueil — Développeur Full Stack & Designer",
       work: "Projets — 11 projets livrés",
@@ -50,6 +50,7 @@ function stripAgentsParam() {
 /** Mounts the robot-cursor engine and renders the bottom dock (Pause / Agents / Sound / Tour). */
 export default function BuildEngine() {
   const engine = useRef<Engine | null>(null);
+  const konamiAt = useRef(0);
   const [st, setSt] = useState<EngineState>({ agents: true, paused: false, tour: false, sound: false });
   const [lang, setLang] = useState<"en" | "fr">("en");
   const [cap, setCap] = useState<keyof (typeof TXT)["en"]["caps"]>("top");
@@ -119,9 +120,29 @@ export default function BuildEngine() {
     };
   }, [st.tour]);
 
+  // Konami code: ↑ ↑ ↓ ↓ ← → ← → B A
+  useEffect(() => {
+    const seq = ["arrowup", "arrowup", "arrowdown", "arrowdown", "arrowleft", "arrowright", "arrowleft", "arrowright", "b", "a"];
+    let i = 0;
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key.toLowerCase();
+      if (k === seq[i]) {
+        i++;
+        if (i === seq.length) {
+          i = 0;
+          konamiAt.current = Date.now(); // the final "A" must not also toggle agents
+          engine.current?.party();
+        }
+      } else i = k === seq[0] ? 1 : 0;
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (Date.now() - konamiAt.current < 100) return;
       const el = e.target as HTMLElement | null;
       if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;
       const k = e.key.toLowerCase();
@@ -142,6 +163,12 @@ export default function BuildEngine() {
         </div>
       )}
       <div className="dock" role="toolbar" aria-label="Build controls">
+        <button type="button" className="dock-btn" onClick={() => window.dispatchEvent(new Event("open-palette"))} title={t.tSearch} aria-haspopup="dialog">
+          <Search size={14} aria-hidden />
+          <span className="dock-label-sm">{t.search}</span>
+          <kbd>/</kbd>
+        </button>
+        <span className="dock-sep" aria-hidden />
         <button type="button" className="dock-btn" onClick={togglePause} disabled={!st.agents && !st.tour} aria-pressed={st.paused} title={t.tPause}>
           {st.paused ? <Play size={14} aria-hidden /> : <Pause size={14} aria-hidden />}
           <span>{st.paused ? t.resume : t.pause}</span>
