@@ -16,7 +16,7 @@ const FILTERS: { id: string; label?: string; test: (t: string[]) => boolean }[] 
   { id: "AI", test: (t) => t.some((x) => /AI$/.test(x)) },
 ];
 
-export default function ProjectGrid({ projects, labels }: { projects: Project[]; labels: Labels }) {
+export default function ProjectGrid({ projects, labels, images = {} }: { projects: Project[]; labels: Labels; images?: Record<string, string | null> }) {
   const [active, setActive] = useState("all");
   const [status, setStatus] = useState<Record<string, boolean>>({});
   useEffect(() => {
@@ -57,6 +57,12 @@ export default function ProjectGrid({ projects, labels }: { projects: Project[];
         {projects.map((p) => (
           <li key={p.n} className="flex" hidden={!shown.has(p.n)}>
             <article data-build="pop" data-label="card" className="card flex w-full flex-col p-6">
+              {images[p.slug] && (
+                <a href={`/projects/${p.slug}`} tabIndex={-1} aria-hidden className="-mx-2 -mt-2 mb-5 block overflow-hidden rounded-xl border border-white/10 bg-[#0b0b0d]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={images[p.slug]!} alt="" loading="lazy" className="aspect-[16/10] w-full object-cover object-top transition-transform duration-500 hover:scale-[1.03]" />
+                </a>
+              )}
               <div className="flex items-start justify-between gap-4">
                 <span className="font-display text-5xl leading-none text-zinc-500">{p.n}</span>
                 <span className="max-w-[60%] pt-1 text-right font-mono text-[0.65rem] uppercase leading-snug tracking-[0.14em] text-accent">

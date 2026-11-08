@@ -1,5 +1,6 @@
 import type { Content } from "@/lib/content";
 import ProjectGrid from "./ProjectGrid";
+import { projectImage } from "@/lib/files";
 
 export default function Work({ c }: { c: Content }) {
   return (
@@ -23,7 +24,11 @@ export default function Work({ c }: { c: Content }) {
           </div>
         </div>
       </div>
-      <ProjectGrid projects={c.projects} labels={c.ui} />
+      <ProjectGrid
+        projects={c.projects}
+        labels={c.ui}
+        images={Object.fromEntries(c.projects.map((p) => [p.slug, projectImage(p.slug)]))}
+      />
     </section>
   );
 }

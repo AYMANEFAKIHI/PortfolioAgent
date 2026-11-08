@@ -431,8 +431,8 @@ export function createEngine(): Engine {
   function beginTour() {
     const dist = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     if (dist < 50) return;
-    const v = 130; // px per second, steady cruise
-    const ta = 1.8; // seconds of ease-in and of ease-out
+    const v = 240; // px per second, steady cruise
+    const ta = 1.5; // seconds of ease-in and of ease-out
     const total = (dist - v * ta) / v + 2 * ta;
     if (dist <= v * ta) return;
     tour = { t0: T, y0: window.scrollY, dist, v, ta, total: total * 1000 };
@@ -560,7 +560,8 @@ export function createEngine(): Engine {
     // tour
     if (tourPending && !tour) {
       const heroDone = heroItems.every((h) => h.state === "done");
-      if (!agentsOn || heroDone) {
+      // Start once the hero is built, or after 4s at the latest so the tour never waits forever.
+      if (!agentsOn || heroDone || T > 4000) {
         if (!tourReadyAt) tourReadyAt = T;
         if (T - tourReadyAt > 900) {
           tourPending = false;

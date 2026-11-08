@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { profile } from "@/lib/data";
+import nodemailer from "nodemailer";
 
 export const runtime = "nodejs";
 
-const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
-
 /**
- * Sends the message to your inbox through Resend (https://resend.com).
- * Set RESEND_API_KEY (and optionally CONTACT_TO / CONTACT_FROM) in your environment.
- * Without a key this returns 501 and the form falls back to the visitor's mail app.
+ * Sends the contact form to your Gmail with nodemailer.
+ * Needs GMAIL_USER and GMAIL_PASS (a Google "App password", not your normal password)
+ * in .env.local (and in your hosting provider's environment variables).
+ * Without them this returns 501 and the form falls back to the visitor's mail app.
  */
 export async function POST(req: Request) {
-  const key = process.env.RESEND_API_KEY;
-  if (!key) return NextResponse.json({ error: "not_configured" }, { status: 501 });
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_PASS;
+  if (!user || !pass) return NextResponse.json({ error: "not_configured" }, { status: 501 });
 
   let data: { name?: string; email?: string; message?: string; website?: string };
   try {
@@ -29,18 +29,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "invalid" }, { status: 400 });
   }
 
-  const res = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      from: process.env.CONTACT_FROM || "Portfolio <onboarding@resend.dev>",
-      to: [process.env.CONTACT_TO || profile.email],
-      reply_to: email,
-      subject: `Portfolio message from ${name}`,
-      html: `<p><strong>${esc(name)}</strong> &lt;${esc(email)}&gt;</p><p>${esc(message).replace(/\n/g, "<br>")}</p>`,
-      text: `${name} <${email}>\n\n${message}`,
-    }),
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user, pass },
   });
-  if (!res.ok) return NextResponse.json({ error: "send_failed" }, { status: 502 });
-  return NextResponse.json({ ok: true });
+
+  const mailOptions = {
+    from: user,
+    replyTo: email,
+    to: process.env.CONTACT_TO || user,
+    subject: `New message from ${name} via portfolio contact form`,
+    text: `You have received a new message from your portfolio contact form:\n\nName: ${name}\nEmail: ${email}\nMessage:\n${message}`,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error("[contact] sendMail failed:", err);
+    return NextResponse.json({ error: "send_failed" }, { status: 502 });
+  }
 }
