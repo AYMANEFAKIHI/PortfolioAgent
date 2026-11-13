@@ -61,3 +61,132 @@ test("profile basics", () => {
   assert.ok(profile.linkedin.startsWith("https://"));
   assert.equal(profile.instagram, null);
 });
+
+test("instant build restores the final content state", async () => {
+  class FakeClassList {
+    private set = new Set<string>();
+    add(...names: string[]) { for (const name of names) this.set.add(name); }
+    remove(...names: string[]) { for (const name of names) this.set.delete(name); }
+    contains(name: string) { return this.set.has(name); }
+  }
+
+  class FakeElement {
+    tagName: string;
+    dataset: Record<string, string> = {};
+    children: FakeElement[] = [];
+    style: Record<string, string> & { setProperty: (name: string, value: string) => void };
+    classList = new FakeClassList();
+    attributes: Record<string, string> = {};
+    textContent = "";
+    className = "";
+    innerHTML = "";
+
+    constructor(tag = "div") {
+      this.tagName = tag.toUpperCase();
+      this.style = {
+        setProperty: (name: string, value: string) => {
+          this.style[name] = value;
+        },
+      } as Record<string, string> & { setProperty: (name: string, value: string) => void };
+    }
+
+    getBoundingClientRect() {
+      return { left: 0, top: 0, width: 200, height: 32, right: 200, bottom: 32 };
+    }
+
+    hasAttribute(name: string) { return Object.prototype.hasOwnProperty.call(this.attributes, name); }
+    setAttribute(name: string, value: string) { this.attributes[name] = value; }
+    appendChild(child: FakeElement) {
+      this.children.push(child);
+      return child;
+    }
+    remove() {}
+    querySelector(selector: string) {
+      if (selector === "b") {
+        const existing = this.children.find((child) => child.tagName === "B");
+        if (existing) return existing;
+        const b = new FakeElement("b");
+        this.children.push(b);
+        return b;
+      }
+      return null;
+    }
+    closest() { return null; }
+  }
+
+  const oldWindow = (globalThis as any).window;
+  const oldDocument = (globalThis as any).document;
+  const oldIntersectionObserver = (globalThis as any).IntersectionObserver;
+  const oldRequestAnimationFrame = (globalThis as any).requestAnimationFrame;
+  const oldCancelAnimationFrame = (globalThis as any).cancelAnimationFrame;
+
+  try {
+    const root = new FakeElement("html");
+    root.classList.add("build-mode");
+    const body = new FakeElement("body");
+    const item = new FakeElement("div");
+    item.dataset.build = "type";
+    item.textContent = "Hello world";
+
+    const documentStub = {
+      documentElement: root,
+      body,
+      querySelectorAll: () => [item],
+      createElement: () => new FakeElement("div"),
+      getElementById: () => null,
+    };
+
+    (globalThis as any).window = {
+      innerWidth: 1200,
+      innerHeight: 800,
+      scrollX: 0,
+      scrollY: 0,
+      matchMedia: () => ({ matches: false, addListener() {}, removeListener() {} }),
+      getComputedStyle: () => ({ position: "static" }),
+      addEventListener() {},
+      removeEventListener() {},
+      setTimeout: (fn: () => void) => {
+        fn();
+        return 0;
+      },
+      clearTimeout() {},
+      requestAnimationFrame: () => 0,
+      cancelAnimationFrame() {},
+      history: { replaceState() {} },
+      location: { href: "http://localhost/", pathname: "/", search: "", hash: "" },
+      sessionStorage: { getItem: () => null, setItem() {}, removeItem() {} },
+      localStorage: { getItem: () => null, setItem() {} },
+      navigator: { userAgent: "node" },
+      AudioContext: undefined,
+      webkitAudioContext: undefined,
+      document: documentStub,
+      __af: false,
+    };
+
+    (globalThis as any).requestAnimationFrame = () => 0;
+    (globalThis as any).cancelAnimationFrame = () => {};
+    (globalThis as any).document = documentStub;
+    (globalThis as any).IntersectionObserver = class {
+      constructor(private cb: (entries: Array<{ target: FakeElement; isIntersecting: boolean; boundingClientRect: { bottom: number } }>) => void) {}
+      observe(target: FakeElement) {
+        this.cb([{ target, isIntersecting: false, boundingClientRect: { bottom: -1 } }]);
+      }
+      disconnect() {}
+    };
+
+    const { createEngine } = await import("../lib/engine");
+    const engine = createEngine();
+
+    assert.equal(item.textContent, "Hello world");
+    assert.ok(item.classList.contains("is-built"));
+    assert.equal(item.style.minHeight, "");
+
+    engine.destroy();
+  } finally {
+    (globalThis as any).window = oldWindow;
+    (globalThis as any).document = oldDocument;
+    (globalThis as any).IntersectionObserver = oldIntersectionObserver;
+    (globalThis as any).requestAnimationFrame = oldRequestAnimationFrame;
+    (globalThis as any).cancelAnimationFrame = oldCancelAnimationFrame;
+  }
+});

@@ -227,9 +227,8 @@ export function createEngine(): Engine {
   function instant(it: Item) {
     if (it.state === "done") return;
     queue = queue.filter((q) => q !== it);
-    it.el.classList.add("is-built");
-    it.state = "done";
-    it.doneAt = T;
+    prepare(it);
+    finish(it);
   }
 
   /* ───────── Agents ───────── */
@@ -431,7 +430,7 @@ export function createEngine(): Engine {
   function beginTour() {
     const dist = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
     if (dist < 50) return;
-    const v = 180; // px per second, steady cruise
+    const v = 120; // px per second, steady cruise
     const ta = 1.5; // seconds of ease-in and of ease-out
     const total = (dist - v * ta) / v + 2 * ta;
     if (dist <= v * ta) return;
