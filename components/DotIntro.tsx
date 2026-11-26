@@ -20,7 +20,7 @@ const T = {
 const DOTS_URL = "/intro/dots.bin";
 const PHOTO_URL = "/intro/photo.webp";
 const REVEAL_MS = 3600;
-const AUTO_ENTER_MS = 2500; // photo stays this long after the reveal, then the portfolio opens
+const AUTO_ENTER_MS = 1500; // photo stays this long after the reveal, then the portfolio opens
 const BAND_TOP = 1.15;
 const BAND_BOTTOM = -1.3;
 
