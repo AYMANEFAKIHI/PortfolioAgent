@@ -598,7 +598,13 @@ export function createEngine(): Engine {
   }
 
   if (agentsOn) {
-    after(start, BOOT_MS);
+    // Wait for the dot-portrait intro (components/DotIntro.tsx) before the agents boot.
+    if (root.classList.contains("intro")) {
+      const onIntroDone = () => after(start, BOOT_MS);
+      window.addEventListener("intro-done", onIntroDone, { once: true });
+    } else {
+      after(start, BOOT_MS);
+    }
   } else {
     started = true;
     boot?.remove();

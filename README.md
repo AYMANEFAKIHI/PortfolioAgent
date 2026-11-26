@@ -20,6 +20,8 @@ npm run dev
 
 `?agents=on` forces the animation (even with reduced motion), `?agents=off` turns it off.
 
+**Dot-portrait intro** (`components/DotIntro.tsx`, assets in `public/intro/`): plays once per browser session before the agents start. The cursor parts the dots and lights them up, *Reveal* dissolves the dots into the photo, then *Enter portfolio* (or Esc / Enter key at any time) hands over to the agents. `?intro=on` forces it, `?intro=off` skips it. Skipped automatically with reduced motion and on Tour / Agents reloads.
+
 | `S` | Sound on / off (soft blips while the robots build; off by default) |
 
 The language switch (EN / FR) is in the top bar. Hovering near an idle robot cursor makes it step aside.

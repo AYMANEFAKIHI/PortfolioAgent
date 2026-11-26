@@ -142,6 +142,7 @@ export default function BuildEngine() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.documentElement.classList.contains("intro")) return; // dot intro still on screen
       if (Date.now() - konamiAt.current < 100) return;
       const el = e.target as HTMLElement | null;
       if (el && (el.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName))) return;

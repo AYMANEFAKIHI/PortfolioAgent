@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Anton, Geist, Geist_Mono, Caveat_Brush } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import BuildEngine from "@/components/BuildEngine";
+import DotIntro from "@/components/DotIntro";
 import { RobotHead } from "@/components/RobotHead";
 import { getContent, getLang } from "@/lib/content";
 import { profile, seo } from "@/lib/data";
@@ -46,11 +47,15 @@ export const viewport: Viewport = {
 
 // Runs before first paint: decides whether the cursors build the page, so nothing flashes.
 // ?agents=on forces it (even with reduced motion), ?agents=off disables it, otherwise the saved choice / OS setting decides.
+// Dot-portrait intro: once per browser session (skipped on tour/agent reloads and with reduced motion). ?intro=on forces it, ?intro=off disables it.
 const headScript = `(function(){try{var d=document.documentElement,m=/[?&]agents=(on|off)/.exec(location.search),ls=null;try{ls=localStorage.getItem('agents')}catch(e){}
 var rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
 var on=m?m[1]==='on':(ls?ls==='on':!rm);
 if(on){d.classList.add('build-mode');setTimeout(function(){if(!window.__af){d.classList.remove('build-mode')}},9000)}
 d.setAttribute('data-agents',on?'on':'off');
+var mi=/[?&]intro=(on|off)/.exec(location.search),seen=null,tour=null;try{seen=sessionStorage.getItem('intro');tour=sessionStorage.getItem('tour')}catch(e){}
+var intro=mi?mi[1]==='on':(!seen&&!tour&&!rm);
+if(intro){d.classList.add('intro');setTimeout(function(){if(!window.__introMounted&&d.classList.contains('intro')){d.classList.remove('intro');window.dispatchEvent(new Event('intro-done'))}},12000)}
 try{if(sessionStorage.getItem('tour')==='1'){history.scrollRestoration='manual'}}catch(e){}
 }catch(e){}})();`;
 
@@ -76,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
             <div style={{ color: "#52525b" }}>{lang === "fr" ? "construction du portfolio" : "building portfolio"}</div>
           </div>
         </div>
+        <DotIntro lang={lang} word={lang === "fr" ? "DÉVELOPPEUR" : "DEVELOPER"} />
         {children}
         <BuildEngine />
         <CommandPalette
